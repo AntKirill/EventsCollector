@@ -127,14 +127,15 @@ def start_events_collector():
 
 
 def main():
+    os.chdir("./src")
     statinfo = os.stat("eventsCollector.log")
     if (statinfo.st_size > 1024 * 1024):
         # Clear log file if its size more then 1MB
-        with open("log.txt", "w") as f:
+        with open("eventsCollector.log", "w") as f:
             f.close()
     logging.basicConfig(filename="eventsCollector.log", level=logging.INFO,
                         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    changesWatcher.watch_modify("./invokeFiles", start_events_collector)  # blocking call
+    changesWatcher.watch_modify("./invokeFiles/", start_events_collector)  # blocking call
 
 
 if __name__ == '__main__':
