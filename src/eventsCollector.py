@@ -10,7 +10,8 @@ import google_calendar.google_calendar_client as google_calendar_client
 import google_calendar.google_calendar_manager as google_calendar_api
 import google_calendar.json_extracter as gc_json_extracter
 import state_tracker
-import trello.apiWrapper as trello_api
+import trello.trello_manager as trello_api
+import trello.trello_client as trello_client
 import trello.jsonExtracter as trello_json_extracter
 
 
@@ -19,30 +20,32 @@ class EventsCollector:
         self.google_calendar_manager = google_calendar_api.GoogleCalendarManager(
             google_calendar_client.GoogleCalendarClient())
         self.google_calendar_manager.authenticate()
+        logging.getLogger().setLevel(getattr(logging, logging.getLevelName(logging.INFO)))
+        self.trello_manager = trello_api.TrelloManager(trello_client.TrelloClient())
+        self.trello_manager.authenticate()
 
     def post_to_trello(self, state, board_name, list_name, events_list):
         logging.info('Start posting to list {1} of board {0}'.format(board_name, list_name))
         if len(events_list) is 0:
             logging.info('Empty events list, so return')
             return
-        trello_api.authenticate()
 
         logging.info('Try to guess target list id')
         list_id_guess = state_tracker.get_hashed_list_id(state, board_name, list_name)
 
         if list_id_guess is None:
             logging.info('No guess')
-            board_ids_list = trello_api.getAllBoardsIds()
-            board_id = trello_api.getBoardIdByName(board_ids_list, board_name)
-            lists_list = trello_api.getAllListsOnBoard(board_id)
-            incoming_list_id = trello_api.getListIdByName(lists_list, list_name)
+            board_ids_list = self.trello_manager.getAllBoardsIds()
+            board_id = self.trello_manager.getBoardIdByName(board_ids_list, board_name)
+            lists_list = self.trello_manager.getAllListsOnBoard(board_id)
+            incoming_list_id = self.trello_manager.getListIdByName(lists_list, list_name)
             state_tracker.save_list_id(state, board_name, list_name, incoming_list_id)
         else:
             logging.info('Guessed id is {0}'.format(list_id_guess))
             incoming_list_id = list_id_guess
         for event in events_list:
             logging.info('posting card with name {0}'.format(gc_json_extracter.getEventName(event)))
-            trello_api.postCardToList(incoming_list_id, gc_json_extracter.getEventName(event),
+            self.trello_manager.postCardToList(incoming_list_id, gc_json_extracter.getEventName(event),
                                       gc_json_extracter.getDescription(event))
 
 
@@ -64,13 +67,12 @@ class EventsCollector:
                 return mangled_name[pref_len:]
 
         logging.info("Shifting all deadlines from trello.com to google calendar")
-        trello_api.authenticate()
-        board_ids_list = trello_api.getAllBoardsIds()
-        my_board_id = trello_api.getBoardIdByName(board_ids_list, board_name)
+        board_ids_list = self.trello_manager.getAllBoardsIds()
+        my_board_id = self.trello_manager.getBoardIdByName(board_ids_list, board_name)
 
         # Get all cards with deadlines from main board of Trello.com
 
-        trello_cards_list = trello_api.getAllCardsFromBoard(my_board_id)
+        trello_cards_list = self.trello_manager.getAllCardsFromBoard(my_board_id)
         date_to_cards_list = {}
         for card in trello_cards_list:
             if trello_json_extracter.is_card_with_deadline(card) is False:
