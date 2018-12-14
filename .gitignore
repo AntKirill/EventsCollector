@@ -1,5 +1,7 @@
 .idea/
 credentials.json
+token.json
+state.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
