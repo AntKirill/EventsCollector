@@ -1,4 +1,3 @@
-#!/home/kirant/Projects/EventsCollector/venv/bin/python3
 import logging
 import os
 import time
@@ -46,7 +45,7 @@ def get_today_allday_events_from_google_calendar():
     return allDaysList
 
 
-def shift_deadlines_from_trello_to_google_calendar():
+def shift_deadlines_from_trello_to_google_calendar(board_name):
     def mangle_name_for_gc(name):
         return "Дедлайн по: " + name
 
@@ -60,7 +59,8 @@ def shift_deadlines_from_trello_to_google_calendar():
     logging.info("Shifting all deadlines from trello.com to google calendar")
     trello_api.authenticate()
     service = google_calendar_api.authenticate()
-    my_board_id = "59cbb3610ba74a2916280159"  # TODO: read board from cache
+    board_ids_list = trello_api.getAllBoardsIds()
+    my_board_id = trello_api.getBoardIdByName(board_ids_list, board_name)
 
     # Get all cards with deadlines from main board of Trello.com
 
@@ -123,7 +123,7 @@ def start_events_collector():
         logging.info('Posting to trello.com')
         post_to_trello(cur_state, "My To Do Board", "Incoming", new_events)
         state_tracker.update_state(cur_state, new_events)
-    shift_deadlines_from_trello_to_google_calendar()
+    shift_deadlines_from_trello_to_google_calendar("My To Do Board")
 
 
 def main():

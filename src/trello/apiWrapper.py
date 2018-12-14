@@ -3,23 +3,28 @@ import logging
 
 import requests
 import webbrowser
-# https://trello.com/1/authorize?expiration=1day&name=MyPersonalToken&scope=read&response_type=token&key=3e85bdd137af7678f0572a8f45b864b5&callback_method=fragment&return_url=https://google.com
 from pip._vendor.distlib.compat import raw_input
 
 
 def authenticate():
     global key, token, authPart
     cred_filename = "trello/credentials.json"
+    token_filename = "trello/token.json"
     with open(cred_filename, 'r') as file:
-        credentials = json.load(file)
-    key = credentials['api_key']
-    token = credentials.get('secret_token')
-    if token is None:
-        webbrowser.open_new_tab("https://trello.com/1/authorize?expiration=1day&name=EventsCollector&scope=read,write&response_type=token&key=3e85bdd137af7678f0572a8f45b864b5")
+        credentials_json = json.load(file)
+    key = credentials_json['api_key']
+    try:
+        with open(token_filename, 'r') as file:
+            token_json = json.load(file)
+        token = token_json.get('secret_token')
+    except FileNotFoundError:
+        request_url = "https://trello.com/1/authorize?expiration=never&name=EventsCollector&scope=read,write&response_type=token&key="
+        request_url += key
+        webbrowser.open_new_tab(request_url)
         token = raw_input('Paste the token here: ')
-        credentials['secret_token'] = token
-        with open(cred_filename, 'w') as file:
-            json.dump(credentials, file)
+        token_json = {'secret_token': token}
+        with open(token_filename, 'w') as file:
+            json.dump(token_json, file)
 
     authPart = {'key': key, 'token': token}
 
