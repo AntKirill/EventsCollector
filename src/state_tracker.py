@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 
-import googleCalendar.jsonExtracter as je
+import google_calendar.json_extracter as je
 
 file_name = 'state.json'
 
