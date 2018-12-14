@@ -3,7 +3,10 @@ import os
 import time
 import urllib.request
 
+from pathlib import Path
+
 import changesWatcher
+import humanfriendly
 import googleCalendar.apiWrapper as google_calendar_api
 import googleCalendar.jsonExtracter as gc_json_extracter
 import stateTracker as state_tracker
@@ -126,16 +129,31 @@ def start_events_collector():
     shift_deadlines_from_trello_to_google_calendar("My To Do Board")
 
 
+def init_logger(log_filename, max_size="1Mb"):
+    root_dir = Path()  # TODO: Change later
+    log_dir = root_dir / 'log'
+    log_dir.mkdir(parents=True, exist_ok=True)  # Created with the default permissions
+
+    log_file = log_dir / log_filename
+    log_file.resolve()  # Optimize file path
+
+    # Clear log file if its size more than max_size
+    if log_file.exists():
+        if log_file.stat().st_size > humanfriendly.parse_size(max_size, binary=True):
+            log_file.open(mode='w').close()
+
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logging.basicConfig(filename=log_file, level=logging.INFO, format=log_format)
+    logging.info("No new events, so return")
+
+
 def main():
-    os.chdir("./src")
-    statinfo = os.stat("eventsCollector.log")
-    if (statinfo.st_size > 1024 * 1024):
-        # Clear log file if its size more then 1MB
-        with open("eventsCollector.log", "w") as f:
-            f.close()
-    logging.basicConfig(filename="eventsCollector.log", level=logging.INFO,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    changesWatcher.watch_modify("./invokeFiles/", start_events_collector)  # blocking call
+    log_filename = 'eventsCollector.log'
+    init_logger(log_filename)
+
+    os.chdir("./src")  # TODO: Move "./invokeFiles/" and secret tokens and delete this
+    # changesWatcher.watch_modify("./invokeFiles/", start_events_collector)  # blocking call # TODO: Uncomment this
+    start_events_collector()
 
 
 if __name__ == '__main__':
