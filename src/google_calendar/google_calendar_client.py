@@ -12,7 +12,9 @@ SCOPES = 'https://www.googleapis.com/auth/calendar'
 class GoogleCalendarClient():
     def do_authentication_flow(self, store):
         flow = client.flow_from_clientsecrets('google_calendar/credentials.json', SCOPES)
-        return tools.run_flow(flow, store)
+        creds = tools.run_flow(flow, store)
+        logging.getLogger().setLevel(getattr(logging, logging.getLevelName(logging.INFO)))
+        return creds
 
     def do_authenticate(self, creds):
         self.service = build('calendar', 'v3', http=creds.authorize(Http()))

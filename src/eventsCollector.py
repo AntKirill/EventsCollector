@@ -10,9 +10,9 @@ import google_calendar.google_calendar_client as google_calendar_client
 import google_calendar.google_calendar_manager as google_calendar_api
 import google_calendar.json_extracter as gc_json_extracter
 import state_tracker
-import trello.trello_manager as trello_api
-import trello.trello_client as trello_client
 import trello.jsonExtracter as trello_json_extracter
+import trello.trello_client as trello_client
+import trello.trello_manager as trello_api
 
 
 class EventsCollector:
@@ -20,7 +20,6 @@ class EventsCollector:
         self.google_calendar_manager = google_calendar_api.GoogleCalendarManager(
             google_calendar_client.GoogleCalendarClient())
         self.google_calendar_manager.authenticate()
-        logging.getLogger().setLevel(getattr(logging, logging.getLevelName(logging.INFO)))
         self.trello_manager = trello_api.TrelloManager(trello_client.TrelloClient())
         self.trello_manager.authenticate()
 
@@ -46,8 +45,7 @@ class EventsCollector:
         for event in events_list:
             logging.info('posting card with name {0}'.format(gc_json_extracter.getEventName(event)))
             self.trello_manager.postCardToList(incoming_list_id, gc_json_extracter.getEventName(event),
-                                      gc_json_extracter.getDescription(event))
-
+                                               gc_json_extracter.getDescription(event))
 
     def get_today_allday_events_from_google_calendar(self):
         logging.info('Get todays all-day events from google calendar')
@@ -99,8 +97,9 @@ class EventsCollector:
                 card_date = trello_json_extracter.get_date_str_from_card(card)
                 card_url = trello_json_extracter.get_card_url(card)
                 # Create all-day red event
-                self.google_calendar_manager.postEvent(mangle_name_for_gc(card_name), date_str=card_date, color_id_str="11",
-                                                  event_description_str=card_url)
+                self.google_calendar_manager.postEvent(mangle_name_for_gc(card_name), date_str=card_date,
+                                                       color_id_str="11",
+                                                       event_description_str=card_url)
                 # Create event at current time
                 # card_time = trello_json_extracter.get_time_str_from_card(card)
                 # gc.postEvent(service, card_name, date_str=card_date, time_str=card_time, color_id_str="11")
@@ -120,6 +119,21 @@ def wait_for_internet_connection():
             pass
 
 
+def config_logger(log_filename):
+    def recreate_file(file_name):
+        with open(file_name, "w") as f:
+            f.close()
+    try:
+        statinfo = os.stat(log_filename)
+        if (statinfo.st_size > 1024 * 1024):
+            # Clear log file if its size more then 1MB
+            recreate_file(log_filename)
+    except FileNotFoundError:
+        recreate_file(log_filename)
+    logging.basicConfig(filename=log_filename, level=logging.INFO,
+                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+
 def start_events_collector():
     wait_for_internet_connection()
     events_collector_instance = EventsCollector()
@@ -137,13 +151,7 @@ def start_events_collector():
 
 def main():
     os.chdir("./src")
-    statinfo = os.stat("eventsCollector.log")
-    if (statinfo.st_size > 1024 * 1024):
-        # Clear log file if its size more then 1MB
-        with open("eventsCollector.log", "w") as f:
-            f.close()
-    logging.basicConfig(filename="eventsCollector.log", level=logging.INFO,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    config_logger("../events_collector.log")
     changes_watcher.watch_modify("./invokefiles/", start_events_collector)  # blocking call
 
 
