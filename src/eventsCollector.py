@@ -10,6 +10,10 @@ import google_calendar.google_calendar_client as google_calendar_client
 import google_calendar.google_calendar_manager as google_calendar_api
 import google_calendar.json_extracter as gc_json_extracter
 import state_tracker
+
+from pathlib import Path
+import humanfriendly
+
 import trello.jsonExtracter as trello_json_extracter
 import trello.trello_client as trello_client
 import trello.trello_manager as trello_api
@@ -118,22 +122,6 @@ def wait_for_internet_connection():
             time.sleep(1)
             pass
 
-
-def config_logger(log_filename):
-    def recreate_file(file_name):
-        with open(file_name, "w") as f:
-            f.close()
-    try:
-        statinfo = os.stat(log_filename)
-        if (statinfo.st_size > 1024 * 1024):
-            # Clear log file if its size more then 1MB
-            recreate_file(log_filename)
-    except FileNotFoundError:
-        recreate_file(log_filename)
-    logging.basicConfig(filename=log_filename, level=logging.INFO,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-
 def start_events_collector():
     wait_for_internet_connection()
     events_collector_instance = EventsCollector()
@@ -149,10 +137,31 @@ def start_events_collector():
     events_collector_instance.shift_deadlines_from_trello_to_google_calendar("My To Do Board")
 
 
+def init_logger(log_filename, max_size="1Mb"):
+    root_dir = Path()  # TODO: Change later
+    log_dir = root_dir / 'log'
+    log_dir.mkdir(parents=True, exist_ok=True)  # Created with the default permissions
+
+    log_file = log_dir / log_filename
+    log_file.resolve()  # Optimize file path
+
+    # Clear log file if its size more than max_size
+    if log_file.exists():
+        if log_file.stat().st_size > humanfriendly.parse_size(max_size, binary=True):
+            log_file.open(mode='w').close()
+
+    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    logging.basicConfig(filename=log_file, level=logging.INFO, format=log_format)
+    logging.info("No new events, so return")
+
+
 def main():
-    os.chdir("./src")
-    config_logger("../events_collector.log")
-    changes_watcher.watch_modify("./invokefiles/", start_events_collector)  # blocking call
+    log_filename = 'events_collector.log'
+    init_logger(log_filename)
+
+    os.chdir("./src")  # TODO: Move "./invokeFiles/" and secret tokens and delete this
+    # changes_watcher.watch_modify("./invokefiles/", start_events_collector)  # blocking call # TODO: Uncomment this
+    start_events_collector()
 
 
 if __name__ == '__main__':
