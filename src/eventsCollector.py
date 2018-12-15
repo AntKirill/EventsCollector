@@ -122,6 +122,7 @@ def wait_for_internet_connection():
             time.sleep(1)
             pass
 
+
 def start_events_collector():
     wait_for_internet_connection()
     events_collector_instance = EventsCollector()
@@ -140,7 +141,7 @@ def start_events_collector():
 def init_logger(log_filename, max_size="1Mb"):
     root_dir = Path()  # TODO: Change later
     log_dir = root_dir / 'log'
-    log_dir.mkdir(parents=True, exist_ok=True)  # Created with the default permissions
+    log_dir.mkdir(parents=True, exist_ok=True)  # Created directory with the default permissions
 
     log_file = log_dir / log_filename
     log_file.resolve()  # Optimize file path
@@ -152,7 +153,6 @@ def init_logger(log_filename, max_size="1Mb"):
 
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(filename=log_file, level=logging.INFO, format=log_format)
-    logging.info("No new events, so return")
 
 
 def main():
@@ -160,7 +160,7 @@ def main():
     init_logger(log_filename)
 
     os.chdir("./src")  # TODO: Move "./invokeFiles/" and secret tokens and delete this
-    # changes_watcher.watch_modify("./invokefiles/", start_events_collector)  # blocking call # TODO: Uncomment this
+    # changes_watcher.watch_modify("./invokefiles/", start_events_collector) # blocking call
     start_events_collector()
 
 
