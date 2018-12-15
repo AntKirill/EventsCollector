@@ -5,7 +5,7 @@ import urllib.request
 
 import humanfriendly
 
-import EventsCollector
+from EventsCollector import EventsCollector
 import settings
 import state_tracker
 
@@ -24,7 +24,7 @@ def wait_for_internet_connection():
 
 def pull_events():
     wait_for_internet_connection()
-    events_collector_instance = EventsCollector.EventsCollector()
+    events_collector_instance = EventsCollector()
     events = events_collector_instance.get_today_allday_events_from_google_calendar()
     cur_state = state_tracker.load_state()
     new_events = state_tracker.get_new_events(cur_state, events)
@@ -42,7 +42,7 @@ def init_logger(log_filename, max_size='1Mb'):
     log_dir.mkdir(parents=True, exist_ok=True)  # Created directory with the default permissions
 
     log_file = log_dir / log_filename
-    log_file.resolve()  # Optimize file path
+    log_file.resolve()
 
     # Clear log file if its size more than max_size
     if log_file.exists():

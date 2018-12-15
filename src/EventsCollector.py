@@ -6,7 +6,7 @@ import google_calendar.json_extracter as gc_json_extracter
 import state_tracker
 
 
-import trello.jsonExtracter as trello_json_extracter
+import trello.json_extracter as trello_json_extracter
 import trello.trello_client as trello_client
 import trello.trello_manager as trello_api
 
