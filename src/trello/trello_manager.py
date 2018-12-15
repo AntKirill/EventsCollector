@@ -1,15 +1,15 @@
 import json
 import logging
-
+import settings
 
 class TrelloManager:
     def __init__(self, client):
         self.client = client
 
     def authenticate(self):
-        cred_filename = "trello/credentials.json"
+        cred_file = settings.CREDENTIALS_FILE['trello']  # TODO: Refactor this. Make simular interface.
         token_filename = "trello/token.json"
-        with open(cred_filename, 'r') as file:
+        with cred_file.open(mode='r') as file:
             credentials_json = json.load(file)
         key = credentials_json['api_key']
         try:

@@ -5,13 +5,16 @@ from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import client, tools
 
+import settings
+
 # If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 
 
 class GoogleCalendarClient():
-    def do_authentication_flow(self, store):
-        flow = client.flow_from_clientsecrets('google_calendar/credentials.json', SCOPES)
+    @staticmethod
+    def do_authentication_flow(store):
+        flow = client.flow_from_clientsecrets(settings.CREDENTIALS_FILE['google_calendar'], SCOPES)
         creds = tools.run_flow(flow, store)
         logging.getLogger().setLevel(getattr(logging, logging.getLevelName(logging.INFO)))
         return creds
