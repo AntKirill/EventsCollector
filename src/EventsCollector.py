@@ -91,9 +91,10 @@ class EventsCollector:
                     logging.info("already have event with name {0}, so skip it".format(card_name))
                     continue
                 card_date = trello_json_extracter.get_date_str_from_card(card)
+                card_time = trello_json_extracter.get_time_str_from_card(card)
                 card_url = trello_json_extracter.get_card_url(card)
                 # Create all-day red event
-                self.google_calendar_manager.postEvent(mangle_name_for_gc(card_name), date_str=card_date,
+                self.google_calendar_manager.postEvent(mangle_name_for_gc(card_name), date_str=card_date, time_str=card_time,
                                                        color_id_str="11",
                                                        event_description_str=card_url)
                 # Create event at current time
