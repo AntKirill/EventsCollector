@@ -3,7 +3,6 @@ import logging
 
 
 class TrelloManager:
-
     def __init__(self, client):
         self.client = client
 

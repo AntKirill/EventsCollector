@@ -9,8 +9,8 @@ SCOPES = "https://trello.com/1/authorize?expiration=never&name=EventsCollector&s
 
 
 class TrelloClient:
-
-    def do_authentication_flow(self, api_key):
+    @staticmethod
+    def do_authentication_flow(api_key):
         request_url = SCOPES
         request_url += api_key
         webbrowser.open_new_tab(request_url)
