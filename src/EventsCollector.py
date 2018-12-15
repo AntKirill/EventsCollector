@@ -1,18 +1,10 @@
-#!/home/kirant/Projects/EventsCollector/venv/bin/python3
-
 import logging
-import os
-import time
-import urllib.request
 
-import changes_watcher
 import google_calendar.google_calendar_client as google_calendar_client
 import google_calendar.google_calendar_manager as google_calendar_api
 import google_calendar.json_extracter as gc_json_extracter
 import state_tracker
 
-from pathlib import Path
-import humanfriendly
 
 import trello.jsonExtracter as trello_json_extracter
 import trello.trello_client as trello_client
@@ -109,60 +101,3 @@ class EventsCollector:
                 # gc.postEvent(service, card_name, date_str=card_date, time_str=card_time, color_id_str="11")
 
         logging.info("Shifting done")
-
-
-def wait_for_internet_connection():
-    while True:
-        try:
-            urllib.request.urlopen('http://google.com')
-            logging.info('Got network connection')
-            return
-        except urllib.request.URLError:
-            logging.info('Waiting for network ...')
-            time.sleep(1)
-            pass
-
-
-def start_events_collector():
-    wait_for_internet_connection()
-    events_collector_instance = EventsCollector()
-    events = events_collector_instance.get_today_allday_events_from_google_calendar()
-    cur_state = state_tracker.load_state()
-    new_events = state_tracker.get_new_events(cur_state, events)
-    if len(new_events) is 0:
-        logging.info("No new events, so return")
-    else:
-        logging.info('Posting to trello.com')
-        events_collector_instance.post_to_trello(cur_state, "My To Do Board", "Incoming", new_events)
-        state_tracker.update_state(cur_state, new_events)
-    events_collector_instance.shift_deadlines_from_trello_to_google_calendar("My To Do Board")
-
-
-def init_logger(log_filename, max_size="1Mb"):
-    root_dir = Path()  # TODO: Change later
-    log_dir = root_dir / 'log'
-    log_dir.mkdir(parents=True, exist_ok=True)  # Created directory with the default permissions
-
-    log_file = log_dir / log_filename
-    log_file.resolve()  # Optimize file path
-
-    # Clear log file if its size more than max_size
-    if log_file.exists():
-        if log_file.stat().st_size > humanfriendly.parse_size(max_size, binary=True):
-            log_file.open(mode='w').close()
-
-    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(filename=log_file, level=logging.INFO, format=log_format)
-
-
-def main():
-    log_filename = 'events_collector.log'
-    init_logger(log_filename)
-
-    os.chdir("./src")  # TODO: Move "./invokeFiles/" and secret tokens and delete this
-    # changes_watcher.watch_modify("./invokefiles/", start_events_collector) # blocking call
-    start_events_collector()
-
-
-if __name__ == '__main__':
-    main()
