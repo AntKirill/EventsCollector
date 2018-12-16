@@ -5,6 +5,7 @@ import urllib.request
 
 import humanfriendly
 
+import changes_watcher
 from EventsCollector import EventsCollector
 import settings
 import state_tracker
@@ -58,9 +59,8 @@ def init_logger(log_filename, max_size='1Mb'):
 def main():
     init_logger(settings.LOG_FILENAME)
 
-    # os.chdir('./src')  # TODO: Move "./invokeFiles/" and secret tokens and delete this
-    # changes_watcher.watch_modify("./invokefiles/", start_events_collector) # blocking call
-    pull_events()  # TODO: Run in loop with timeout
+    changes_watcher.watch_modify("./invokefiles/", pull_events) # blocking call
+    # pull_events()  # TODO: Run in loop with timeout
 
 
 if __name__ == '__main__':
