@@ -22,8 +22,8 @@ class GoogleCalendarManager:
             creds = self.client.do_authentication_flow(store)
         return self.client.do_authenticate(creds)
 
-    # Returns dictionary of json object with N upcoming events
-    def getNUpcomingEvents(self, eventsAmount):
+    # Returns dictionary of json object with not more then N upcoming events
+    def get_n_upcoming_events(self, eventsAmount):
         logging.info('Getting the upcoming {0} events'.format(eventsAmount))
         events = self.client.get_upcoming_events('primary', eventsAmount)
 
@@ -32,28 +32,30 @@ class GoogleCalendarManager:
             return None
         return events
 
-    def getAllDayEvents(self, date_iso):
+    # Returns list with all-day events planed for date = date_iso
+    def get_all_day_events(self, date_iso):
         t = time.strptime(date_iso, "%Y-%m-%d")
         day = datetime.date(t.tm_year, t.tm_mon, t.tm_mday)
 
-        startDayTimeStr = day.isoformat()
-        startDayTimeStr += 'T00:00:00Z'
-        endDayTimeStr = day.isoformat()
-        endDayTimeStr += 'T00:01:00Z'
-        eventsForToday = self.client.get_todays_allday_events('primary', startDayTimeStr, endDayTimeStr, True)
-        allDays = []
-        if eventsForToday is not None:
-            for event in eventsForToday:
+        start_day_time_str = day.isoformat()
+        start_day_time_str += 'T00:00:00Z'
+        end_day_time_str = day.isoformat()
+        end_day_time_str += 'T00:01:00Z'
+        events_for_today = self.client.get_todays_allday_events('primary', start_day_time_str, end_day_time_str, True)
+        all_days = []
+        if events_for_today is not None:
+            for event in events_for_today:
                 if event['start'].get('dateTime') is None:
-                    allDays.append(event)
-        return allDays
+                    all_days.append(event)
+        return all_days
 
     # Returns list with all all-day events for today
-    def getTodaysAllDayEvents(self):
-        return self.getAllDayEvents(datetime.date.today().isoformat())
+    def get_todays_all_day_events(self):
+        return self.get_all_day_events(datetime.date.today().isoformat())
 
+    # Accepts event_name_str as string, date_str in ISO format (like 2018-09-26), time_str (like H:M:S), ...
     # Return None with ok and error_str if not
-    def postEvent(self, event_name_str, date_str, time_str=None, color_id_str=None, event_description_str=None):
+    def post_event(self, event_name_str, date_str, time_str=None, color_id_str=None, event_description_str=None):
         if time_str is not None:
             t = time.strptime(date_str + " " + time_str, "%Y-%m-%d %H:%M:%S")
         else:

@@ -45,7 +45,7 @@ class EventsCollector:
 
     def get_today_allday_events_from_google_calendar(self):
         logging.info('Get todays all-day events from google calendar')
-        allDaysList = self.google_calendar_manager.getTodaysAllDayEvents()
+        allDaysList = self.google_calendar_manager.get_todays_all_day_events()
         logging.info('Done')
         return allDaysList
 
@@ -79,7 +79,7 @@ class EventsCollector:
 
         # Post all cards with deadlines to google calendar
         for date, cards_list in date_to_cards_list.items():
-            card_gc_list = self.google_calendar_manager.getAllDayEvents(date)
+            card_gc_list = self.google_calendar_manager.get_all_day_events(date)
             name_to_card_gc = {}
             for card in card_gc_list:
                 name = gc_json_extracter.getEventName(card)
@@ -93,9 +93,9 @@ class EventsCollector:
                 card_date = trello_json_extracter.get_date_str_from_card(card)
                 card_url = trello_json_extracter.get_card_url(card)
                 # Create all-day red event
-                self.google_calendar_manager.postEvent(mangle_name_for_gc(card_name), date_str=card_date,
-                                                       color_id_str="11",
-                                                       event_description_str=card_url)
+                self.google_calendar_manager.post_event(mangle_name_for_gc(card_name), date_str=card_date,
+                                                        color_id_str="11",
+                                                        event_description_str=card_url)
                 # Create event at current time
                 # card_time = trello_json_extracter.get_time_str_from_card(card)
                 # gc.postEvent(service, card_name, date_str=card_date, time_str=card_time, color_id_str="11")
