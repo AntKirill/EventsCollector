@@ -1,10 +1,11 @@
 import logging
-import os
 import time
 import urllib.request
+import subprocess
 
 import humanfriendly
 
+import changes_watcher
 from EventsCollector import EventsCollector
 import settings
 import state_tracker
@@ -42,23 +43,23 @@ def init_logger(log_filename, max_size='1Mb'):
     log_dir.mkdir(parents=True, exist_ok=True)  # Created directory with the default permissions
 
     log_file = log_dir / log_filename
-    log_file.resolve()
 
     # Clear log file if its size more than max_size
     if log_file.exists():
         if log_file.stat().st_size > humanfriendly.parse_size(max_size, binary=True):
             log_file.open(mode='w').close()
+    else:
+        log_file.open(mode='w').close()
 
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(filename=log_file, level=logging.INFO, format=log_format)
+    logging.basicConfig(filename=log_file.resolve().as_posix(), level=logging.INFO, format=log_format)
 
 
 def main():
     init_logger(settings.LOG_FILENAME)
 
-    os.chdir('./src')  # TODO: Move "./invokeFiles/" and secret tokens and delete this
-    # changes_watcher.watch_modify("./invokefiles/", start_events_collector) # blocking call
-    pull_events()  # TODO: Run in loop with timeout
+    changes_watcher.watch_modify("./invokefiles/", pull_events)  # blocking call
+    # pull_events()  # TODO: Run in loop with timeout
 
 
 if __name__ == '__main__':

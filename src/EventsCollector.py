@@ -4,8 +4,6 @@ import google_calendar.google_calendar_client as google_calendar_client
 import google_calendar.google_calendar_manager as google_calendar_api
 import google_calendar.json_extracter as gc_json_extracter
 import state_tracker
-
-
 import trello.json_extracter as trello_json_extracter
 import trello.trello_client as trello_client
 import trello.trello_manager as trello_api
@@ -30,22 +28,22 @@ class EventsCollector:
 
         if list_id_guess is None:
             logging.info('No guess')
-            board_ids_list = self.trello_manager.getAllBoardsIds()
-            board_id = self.trello_manager.getBoardIdByName(board_ids_list, board_name)
-            lists_list = self.trello_manager.getAllListsOnBoard(board_id)
-            incoming_list_id = self.trello_manager.getListIdByName(lists_list, list_name)
+            board_ids_list = self.trello_manager.get_all_boards_ids()
+            board_id = self.trello_manager.get_board_id_by_name(board_ids_list, board_name)
+            lists_list = self.trello_manager.get_all_lists_on_board(board_id)
+            incoming_list_id = self.trello_manager.get_list_id_by_name(lists_list, list_name)
             state_tracker.save_list_id(state, board_name, list_name, incoming_list_id)
         else:
             logging.info('Guessed id is {0}'.format(list_id_guess))
             incoming_list_id = list_id_guess
         for event in events_list:
             logging.info('posting card with name {0}'.format(gc_json_extracter.getEventName(event)))
-            self.trello_manager.postCardToList(incoming_list_id, gc_json_extracter.getEventName(event),
-                                               gc_json_extracter.getDescription(event))
+            self.trello_manager.post_card_to_list(incoming_list_id, gc_json_extracter.getEventName(event),
+                                                  gc_json_extracter.getDescription(event))
 
     def get_today_allday_events_from_google_calendar(self):
         logging.info('Get todays all-day events from google calendar')
-        allDaysList = self.google_calendar_manager.getTodaysAllDayEvents()
+        allDaysList = self.google_calendar_manager.get_todays_all_day_events()
         logging.info('Done')
         return allDaysList
 
@@ -61,12 +59,12 @@ class EventsCollector:
                 return mangled_name[pref_len:]
 
         logging.info("Shifting all deadlines from trello.com to google calendar")
-        board_ids_list = self.trello_manager.getAllBoardsIds()
-        my_board_id = self.trello_manager.getBoardIdByName(board_ids_list, board_name)
+        board_ids_list = self.trello_manager.get_all_boards_ids()
+        my_board_id = self.trello_manager.get_board_id_by_name(board_ids_list, board_name)
 
         # Get all cards with deadlines from main board of Trello.com
 
-        trello_cards_list = self.trello_manager.getAllCardsFromBoard(my_board_id)
+        trello_cards_list = self.trello_manager.get_all_cards_from_board(my_board_id)
         date_to_cards_list = {}
         for card in trello_cards_list:
             if trello_json_extracter.is_card_with_deadline(card) is False:
@@ -79,7 +77,7 @@ class EventsCollector:
 
         # Post all cards with deadlines to google calendar
         for date, cards_list in date_to_cards_list.items():
-            card_gc_list = self.google_calendar_manager.getAllDayEvents(date)
+            card_gc_list = self.google_calendar_manager.get_all_day_events(date)
             name_to_card_gc = {}
             for card in card_gc_list:
                 name = gc_json_extracter.getEventName(card)
@@ -93,9 +91,9 @@ class EventsCollector:
                 card_date = trello_json_extracter.get_date_str_from_card(card)
                 card_url = trello_json_extracter.get_card_url(card)
                 # Create all-day red event
-                self.google_calendar_manager.postEvent(mangle_name_for_gc(card_name), date_str=card_date,
-                                                       color_id_str="11",
-                                                       event_description_str=card_url)
+                self.google_calendar_manager.post_event(mangle_name_for_gc(card_name), date_str=card_date,
+                                                        color_id_str="11",
+                                                        event_description_str=card_url)
                 # Create event at current time
                 # card_time = trello_json_extracter.get_time_str_from_card(card)
                 # gc.postEvent(service, card_name, date_str=card_date, time_str=card_time, color_id_str="11")
