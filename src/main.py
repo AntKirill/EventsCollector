@@ -1,7 +1,7 @@
 import logging
-import os
 import time
 import urllib.request
+import subprocess
 
 import humanfriendly
 
@@ -51,7 +51,6 @@ def init_logger(log_filename, max_size='1Mb'):
     else:
         log_file.open(mode='w').close()
 
-
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     logging.basicConfig(filename=log_file.resolve().as_posix(), level=logging.INFO, format=log_format)
 
@@ -59,7 +58,7 @@ def init_logger(log_filename, max_size='1Mb'):
 def main():
     init_logger(settings.LOG_FILENAME)
 
-    changes_watcher.watch_modify("./invokefiles/", pull_events) # blocking call
+    changes_watcher.watch_modify("./invokefiles/", pull_events)  # blocking call
     # pull_events()  # TODO: Run in loop with timeout
 
 
