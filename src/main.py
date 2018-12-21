@@ -1,14 +1,13 @@
 import logging
 import time
 import urllib.request
-import subprocess
 
 import humanfriendly
 
 import changes_watcher
-from EventsCollector import EventsCollector
 import settings
 import state_tracker
+from EventsCollector import EventsCollector
 
 
 def wait_for_internet_connection():
