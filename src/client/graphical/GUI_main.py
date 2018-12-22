@@ -6,26 +6,12 @@ from PyQt5.QtWidgets import QTableWidgetItem
 sys.path.append(sys.path[0] + "/../..")
 from main import main as base_main
 
+sys.path.append(sys.path[0] + "/../../config")
+from config_handler import Config_Handler
+
 #using interface
 from PyQt5 import QtWidgets, QtCore
 import design
-
-data = dict()
-#json file interaction
-import json
-
-def get_settings_from_file():
-    try:
-        file = open("input.txt")
-    except IOError as e:
-        update_settings_file()
-    else:
-        with file:
-            data = json.load(file)
-
-def update_settings_file():
-    with open("config_file.json","w") as write_file:
-        json.dump(data, write_file)
 
 
 
@@ -35,15 +21,33 @@ class GUI_handler(QtWidgets.QMainWindow, design.Ui_MainWindow):
 
         super().__init__()
         self.setupUi(self)
-        self.SyncButton.clicked.connect(base_main)
 
-        get_settings_from_file()
-        self.SettingsButton.clicked.connect(update_settings_file)
+        self.CH = Config_Handler()
+        self.settings = self.CH.get_settings_map()
+        self.set_config_data()
+
+        self.SettingsButton.clicked.connect(self.update_config_data)
+
+        self.SyncButton.clicked.connect(base_main)
 
 
         self.create_table()
         self.tableWidget.itemChanged.connect(self.check_empty)
         self.AddButton.clicked.connect(self.create_raw)
+
+    def set_config_data(self):
+        self.DeleteEventsRadio.setChecked(self.settings['delete_expired'])
+        self.DeleteTimeRadio.setChecked(self.settings['data_only'])
+        self.EventNames.setText(self.settings['event_names'])
+
+    def update_config_data(self):
+        to_config = {
+            'delete_expired': self.DeleteEventsRadio.isChecked(),
+            'data_only': self.DeleteTimeRadio.isChecked(),
+            'event_names': str(self.EventNames.text())
+        }
+        self.CH.update_settings_map(to_config)
+
 
 
     def create_raw(self):
@@ -54,14 +58,11 @@ class GUI_handler(QtWidgets.QMainWindow, design.Ui_MainWindow):
         table.setItem(rows, 1, QTableWidgetItem(""))
         table.setCurrentCell(0,0)
 
-
-
     def create_table(self):
         table = self.tableWidget
         table.setColumnCount(2)
         table.setRowCount(10)
         table.setHorizontalHeaderLabels(["Доска", "Календарь"])
-
 
     def check_empty(self):
         table = self.tableWidget
