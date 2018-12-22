@@ -58,7 +58,7 @@ def main():
     init_logger(settings.LOG_FILENAME)
 
     changes_watcher.watch_modify("./invokefiles/", pull_events)  # blocking call
-    # pull_events()  # TODO: Run in loop with timeout
+    pull_events()  # TODO: Run in loop with timeout
 
 
 if __name__ == '__main__':

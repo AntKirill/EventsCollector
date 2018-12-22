@@ -1,6 +1,8 @@
 import json
 import logging
+
 import settings
+
 
 class TrelloManager:
     def __init__(self, client):

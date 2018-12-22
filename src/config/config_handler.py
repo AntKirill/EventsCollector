@@ -1,5 +1,5 @@
 import json
-import re
+
 
 def create_default_file():
     default_data = {
@@ -9,6 +9,7 @@ def create_default_file():
         'timezone': 0
     }
     return default_data
+
 
 class Config_Handler:
     def __init__(self):
@@ -30,7 +31,7 @@ class Config_Handler:
 
     def get_settings_map(self):
 
-        if (not self.data): #словарь в bool это пуст ли он
+        if (not self.data):  # словарь в bool это пуст ли он
             self.__get_settings_from_file()
 
         return self.data

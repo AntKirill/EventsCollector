@@ -2,8 +2,8 @@ import datetime
 import json
 import logging
 import time
-from oauth2client import file
 
+from oauth2client import file
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = 'https://www.googleapis.com/auth/calendar'

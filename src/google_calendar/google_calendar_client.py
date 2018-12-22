@@ -25,14 +25,14 @@ class GoogleCalendarClient():
 
     def get_todays_allday_events(self, calendarId, timeMin, timeMax, singleEvents):
         eventsForTodayRes = self.service.events().list(calendarId=calendarId, timeMin=timeMin,
-                                          timeMax=timeMax, singleEvents=singleEvents).execute()
+                                                       timeMax=timeMax, singleEvents=singleEvents).execute()
         return eventsForTodayRes.get('items', None)
 
     def get_upcoming_events(self, calendarId, amount):
         now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
         events_result = self.service.events().list(calendarId=calendarId, timeMin=now,
-                                          maxResults=amount, singleEvents=True,
-                                          orderBy='startTime').execute()
+                                                   maxResults=amount, singleEvents=True,
+                                                   orderBy='startTime').execute()
 
         return events_result.get('items', [])
 

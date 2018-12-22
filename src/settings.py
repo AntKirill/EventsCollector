@@ -16,6 +16,6 @@ SECRET_DIRECTORY = ROOT_DIRECTORY / 'resources' / 'secret'
 SECRET_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
 CREDENTIALS_FILE = {
-        'google_calendar': (SECRET_DIRECTORY / 'google_calendar_credentials.json').resolve(),
-        'trello': (SECRET_DIRECTORY / 'trello_credentials.json').resolve()
+    'google_calendar': (SECRET_DIRECTORY / 'google_calendar_credentials.json').resolve(),
+    'trello': (SECRET_DIRECTORY / 'trello_credentials.json').resolve()
 }

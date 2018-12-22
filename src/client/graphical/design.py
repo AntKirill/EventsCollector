@@ -6,7 +6,8 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -183,4 +184,3 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Шаблон переноса названий событий:"))
         self.SettingsButton.setText(_translate("MainWindow", "Save Settings"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.Settings), _translate("MainWindow", "Настройки"))
-
