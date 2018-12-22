@@ -1,3 +1,4 @@
+PyQt5
 APScheduler==3.5.3
 argh==0.26.2
 atomicwrites==1.2.1
