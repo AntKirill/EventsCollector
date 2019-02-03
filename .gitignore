@@ -3,6 +3,7 @@
 *_credentials.json
 token.json
 state.json
+*.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

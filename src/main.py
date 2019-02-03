@@ -1,10 +1,13 @@
+#!/usr/bin/python3
 import logging
+import signal
+import socketserver
+import sys
 import time
 import urllib.request
 
 import humanfriendly
 
-import changes_watcher
 import settings
 import state_tracker
 from EventsCollector import EventsCollector
@@ -54,11 +57,33 @@ def init_logger(log_filename, max_size='1Mb'):
     logging.basicConfig(filename=log_file.resolve().as_posix(), level=logging.INFO, format=log_format)
 
 
+class MyTCPHandler(socketserver.StreamRequestHandler):
+    def handle(self):
+        self.data = self.rfile.readline().strip()
+        print("{} wrote:".format(self.client_address[0]))
+        print(self.data)
+        pull_events()
+
+
+def run_ec_server():
+    HOST, PORT = "localhost", 9999
+
+    # Create the server, binding to localhost on port 9999
+    server = socketserver.TCPServer((HOST, PORT), MyTCPHandler)
+
+    def signal_handler(sig, frame):
+        logging.info('signal {0} caught on frame {1}, stop server'.format(sig, frame))
+        server.server_close()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    server.serve_forever()
+
+
 def main():
     init_logger(settings.LOG_FILENAME)
-
-    changes_watcher.watch_modify("./invokefiles/", pull_events)  # blocking call
-    pull_events()  # TODO: Run in loop with timeout
+    run_ec_server()
 
 
 if __name__ == '__main__':
