@@ -18,7 +18,10 @@ def indicator_main():
     def build_menu():
         menu = gtk.Menu()
         item_quit = gtk.MenuItem('Quit')
+        item_synch = gtk.MenuItem('Synch now')
         item_quit.connect('activate', quit)
+        item_synch.connect('activate', synch)
+        menu.append(item_synch)
         menu.append(item_quit)
         menu.show_all()
         return menu
@@ -26,6 +29,9 @@ def indicator_main():
     def quit(source):
         client.send_request(['-q', 'server_shutdown'])
         gtk.main_quit()
+
+    def synch(source):
+        client.send_request(['-q', 'synch'])
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
