@@ -15,7 +15,14 @@ except ImportError:
 SECRET_DIRECTORY = ROOT_DIRECTORY / 'resources' / 'secret'
 SECRET_DIRECTORY.mkdir(parents=True, exist_ok=True)
 
+CLIENTS_CONFIG_DIRECTORY = ROOT_DIRECTORY / 'resources' / 'clients'
+CLIENTS_CONFIG_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
 CREDENTIALS_FILE = {
     'google_calendar': (SECRET_DIRECTORY / 'google_calendar_credentials.json').resolve(),
     'trello': (SECRET_DIRECTORY / 'trello_credentials.json').resolve()
+}
+
+CLIENTS_CONFIG_FILE = {
+    'configs': (CLIENTS_CONFIG_DIRECTORY / 'configs.json').resolve()
 }

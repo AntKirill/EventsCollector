@@ -1,4 +1,5 @@
 import datetime
+import itertools
 import json
 import logging
 import time
@@ -6,7 +7,27 @@ import time
 from oauth2client import file
 
 # If modifying these scopes, delete the file token.json.
+import configs_worker
+
 SCOPES = 'https://www.googleapis.com/auth/calendar'
+
+
+def _extract_target_calendars_ids(all_calendars_info, target_calendars_names):
+    res = []
+    target_names_set = set(target_calendars_names)
+    need_primary = False
+    if 'primary' in target_names_set:
+        need_primary = True
+    for resource in all_calendars_info:
+        their_calendar_name = resource['summary']
+        if their_calendar_name in target_names_set:
+            res.append(resource['id'])
+            target_names_set.remove(their_calendar_name)
+        if need_primary and resource.get('primary', False):
+            res.append(resource['id'])
+            target_names_set.remove('primary')
+            need_primary = False
+    return res
 
 
 class GoogleCalendarManager:
@@ -41,7 +62,17 @@ class GoogleCalendarManager:
         start_day_time_str += 'T00:00:00Z'
         end_day_time_str = day.isoformat()
         end_day_time_str += 'T00:01:00Z'
-        events_for_today = self.client.get_todays_allday_events('primary', start_day_time_str, end_day_time_str, True)
+        config = configs_worker.load_configs_from_disc()
+        events_for_today = []
+        calendars_list_to_process = config['my_calendars']
+
+        all_calendars_info = self.client.get_all_calendars_ids()
+        calendar_ids = _extract_target_calendars_ids(all_calendars_info, calendars_list_to_process)
+
+        for c in calendar_ids:
+            c_today_events = self.client.get_todays_allday_events(c, start_day_time_str, end_day_time_str, True)
+            if c_today_events is not None:
+                events_for_today = itertools.chain(events_for_today, c_today_events)
         all_days = []
         if events_for_today is not None:
             for event in events_for_today:

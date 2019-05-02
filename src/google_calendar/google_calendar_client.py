@@ -11,7 +11,7 @@ import settings
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 
 
-class GoogleCalendarClient():
+class GoogleCalendarClient:
     @staticmethod
     def do_authentication_flow(store):
         flow = client.flow_from_clientsecrets(settings.CREDENTIALS_FILE['google_calendar'], SCOPES)
@@ -28,6 +28,18 @@ class GoogleCalendarClient():
                                                        timeMax=timeMax, singleEvents=singleEvents).execute()
         return eventsForTodayRes.get('items', None)
 
+    def get_all_calendars_ids(self):
+        page_token = None
+        items = []
+        while True:
+            calendar_list = self.service.calendarList().list(pageToken=page_token).execute()
+            for calendar_list_entry in calendar_list['items']:
+                items.append(calendar_list_entry)
+            page_token = calendar_list.get('nextPageToken')
+            if not page_token:
+                break
+        return items
+
     def get_upcoming_events(self, calendarId, amount):
         now = datetime.datetime.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
         events_result = self.service.events().list(calendarId=calendarId, timeMin=now,
@@ -36,6 +48,6 @@ class GoogleCalendarClient():
 
         return events_result.get('items', [])
 
-    def post_event(self, event):
-        resp = self.service.events().insert(calendarId='primary', body=event).execute()
+    def post_event(self, event, calendar_id='primary'):
+        resp = self.service.events().insert(calendarId=calendar_id, body=event).execute()
         return resp.get("error")

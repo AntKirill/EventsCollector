@@ -1,6 +1,7 @@
 import os
 import signal
 
+import client.graphical.gui_handler as configs_gui
 from client import client
 
 APPINDICATOR_ID = 'events_collector_indicator_id'
@@ -17,12 +18,25 @@ def indicator_main():
 
     def build_menu():
         menu = gtk.Menu()
+
         item_quit = gtk.MenuItem('Quit')
         item_synch = gtk.MenuItem('Synch now')
+        item_gc_to_trello = gtk.MenuItem('GC -> Trello')
+        item_trello_to_gc = gtk.MenuItem('Trello deadlines -> GC')
+        item_configs = gtk.MenuItem('Configs')
+
         item_quit.connect('activate', quit)
         item_synch.connect('activate', synch)
+        item_gc_to_trello.connect('activate', gc_to_trello)
+        item_trello_to_gc.connect('activate', trello_to_gc)
+        item_configs.connect('activate', show_configs)
+
         menu.append(item_synch)
+        menu.append(item_gc_to_trello)
+        menu.append(item_trello_to_gc)
+        menu.append(item_configs)
         menu.append(item_quit)
+
         menu.show_all()
         return menu
 
@@ -32,6 +46,15 @@ def indicator_main():
 
     def synch(source):
         client.send_request(['-q', 'synch'])
+
+    def gc_to_trello(source):
+        client.send_request(['-q', 'gc_to_trello'])
+
+    def trello_to_gc(source):
+        client.send_request(['-q', 'trello_to_gc'])
+
+    def show_configs(source):
+        configs_gui.main()
 
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 

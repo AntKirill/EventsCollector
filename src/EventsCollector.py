@@ -43,9 +43,9 @@ class EventsCollector:
 
     def get_today_allday_events_from_google_calendar(self):
         logging.info('Get todays all-day events from google calendar')
-        allDaysList = self.google_calendar_manager.get_todays_all_day_events()
+        all_days_list = self.google_calendar_manager.get_todays_all_day_events()
         logging.info('Done')
-        return allDaysList
+        return all_days_list
 
     def shift_deadlines_from_trello_to_google_calendar(self, board_name):
         def mangle_name_for_gc(name):
