@@ -15,6 +15,7 @@ import settings
 import state_tracker
 from EventsCollector import EventsCollector
 from appindicator import indicator_main
+from client import client
 
 
 def wait_for_internet_connection():
@@ -112,14 +113,16 @@ def run_ec_server():
 
 
 def main():
-    init_logger(settings.LOG_FILENAME)
-    p = Process(target=run_ec_server)
-    q = Process(target=indicator_main)
-    p.start()
-    q.start()
-    p.join()
-    q.join()
-    # run_ec_server()
+    if sys.argv[1] == 'server':
+        init_logger(settings.LOG_FILENAME)
+        p = Process(target=run_ec_server)
+        q = Process(target=indicator_main)
+        p.start()
+        q.start()
+        p.join()
+        q.join()
+    elif sys.argv[1] == 'client':
+        client.send_request(sys.argv[2:])
 
 
 if __name__ == '__main__':

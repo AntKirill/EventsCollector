@@ -1,11 +1,9 @@
 import socket
 import sys
 
-sys.path.append('../')
-import src.server_api as server_api
+import server_api as server_api
 
 # TODO: read this from config
-
 HOST, PORT = "localhost", 9999
 
 
