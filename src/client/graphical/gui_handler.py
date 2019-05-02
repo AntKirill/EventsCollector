@@ -199,11 +199,12 @@ class GUI_handler(QtWidgets.QMainWindow, menu.Ui_MainWindow):
 
 
 def main():
-    app = QtWidgets.QApplication(sys.argv)
-
-    window = GUI_handler()
-    window.show()
-    app.exec()
+    app = QtWidgets.QApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication(sys.argv)
+        window = GUI_handler()
+        window.show()
+        app.exec()
 
 
 if __name__ == '__main__':
